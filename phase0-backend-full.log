@@ -1,0 +1,81 @@
+warning: fields `database`, `storage`, and `auth` are never read
+  --> src/config.rs:9:9
+   |
+ 7 | pub struct Settings {
+   |            -------- fields in this struct
+ 8 |     pub server: ServerConfig,
+ 9 |     pub database: DatabaseConfig,
+   |         ^^^^^^^^
+10 |     pub storage: StorageConfig,
+   |         ^^^^^^^
+11 |     pub auth: AuthConfig,
+   |         ^^^^
+   |
+   = note: `Settings` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `url` and `max_connections` are never read
+  --> src/config.rs:38:9
+   |
+37 | pub struct DatabaseConfig {
+   |            -------------- fields in this struct
+38 |     pub url: String,
+   |         ^^^
+39 |     pub max_connections: u32,
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: `DatabaseConfig` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `endpoint`, `bucket`, `access_key`, and `secret_key` are never read
+  --> src/config.rs:44:9
+   |
+43 | pub struct StorageConfig {
+   |            ------------- fields in this struct
+44 |     pub endpoint: String,
+   |         ^^^^^^^^
+45 |     pub bucket: String,
+   |         ^^^^^^
+46 |     pub access_key: String,
+   |         ^^^^^^^^^^
+47 |     pub secret_key: String,
+   |         ^^^^^^^^^^
+   |
+   = note: `StorageConfig` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `jwt_secret` and `token_ttl_minutes` are never read
+  --> src/config.rs:52:9
+   |
+51 | pub struct AuthConfig {
+   |            ---------- fields in this struct
+52 |     pub jwt_secret: String,
+   |         ^^^^^^^^^^
+53 |     pub token_ttl_minutes: u64,
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AuthConfig` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: enum `AppError` is never used
+  --> src/shared/error.rs:10:10
+   |
+10 | pub enum AppError {
+   |          ^^^^^^^^
+
+warning: struct `ErrorBody` is never constructed
+  --> src/shared/error.rs:22:8
+   |
+22 | struct ErrorBody {
+   |        ^^^^^^^^^
+
+warning: type alias `AppResult` is never used
+  --> src/shared/error.rs:44:10
+   |
+44 | pub type AppResult<T> = Result<T, AppError>;
+   |          ^^^^^^^^^
+
+warning: `kaifangqian-rs` (bin "kaifangqian-rs") generated 7 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s
+     Running `kaifangqian-rs/target/debug/kaifangqian-rs`
+Error: failed to load application settings
+
+Caused by:
+    missing field `server`

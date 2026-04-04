@@ -1,0 +1,32 @@
+FROM maven:3.9.8-eclipse-temurin-8 AS build
+
+WORKDIR /src/kaifangqian-parent
+
+COPY . /src/kaifangqian-parent
+
+RUN mvn -pl kaifangqian-system -am -DskipTests package
+
+
+FROM eclipse-temurin:8u462-b08-jre-jammy
+
+ENV TZ=Asia/Shanghai
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fontconfig \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /usr/share/fonts/chinese /home/kaifangqian/file /app/storage
+
+COPY file/simsun.ttc /usr/share/fonts/chinese/
+COPY file/simkai.ttf /usr/share/fonts/chinese/
+COPY file/simhei.ttf /usr/share/fonts/chinese/
+COPY file/simfang.ttf /usr/share/fonts/chinese/
+RUN fc-cache -fv
+
+COPY file /home/kaifangqian/file
+COPY --from=build /src/kaifangqian-parent/kaifangqian-system/target/kaifangqian.jar /app/kaifangqian.jar
+
+WORKDIR /app
+
+EXPOSE 8899
+
+ENTRYPOINT ["sh", "-c", "exec java -jar -Dspring.profiles.active=prod -Dproject.name=kaifangqian kaifangqian.jar"]

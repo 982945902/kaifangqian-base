@@ -1,0 +1,38 @@
+FROM node:18-bullseye AS build
+
+WORKDIR /src/kaifangqian-web
+
+COPY . /src/kaifangqian-web
+
+RUN npm --prefix opensign-web install --legacy-peer-deps
+RUN npm --prefix opensign-web run build
+
+RUN npm --prefix opensign-tenant install --legacy-peer-deps
+RUN npm --prefix opensign-tenant run build
+
+RUN npm --prefix opensign-manage install --legacy-peer-deps
+RUN npm --prefix opensign-manage run build
+
+RUN npm --prefix opensign-message install --legacy-peer-deps
+RUN npm --prefix opensign-message run build
+
+RUN npm --prefix opensign-mobile install --legacy-peer-deps
+RUN npm --prefix opensign-mobile run build:pro
+
+
+FROM nginx:1.26.1-alpine
+
+ENV API_SERVER_NAME=opensign-api
+ENV DOMAIN_NAME=localhost
+
+COPY --from=build /src/kaifangqian-web/opensign-web/dist /data/
+COPY --from=build /src/kaifangqian-web/opensign-tenant/dist /data/opensign-web
+COPY --from=build /src/kaifangqian-web/opensign-mobile/dist /data/opensign-web
+COPY --from=build /src/kaifangqian-web/opensign-message/dist /data/opensign-web
+COPY --from=build /src/kaifangqian-web/opensign-manage/dist /data/opensign-web
+COPY --from=build /src/kaifangqian-web/handwriting /data/opensign-web/handwriting
+
+COPY nginx-config/nginx.conf /etc/nginx/nginx.conf
+COPY nginx-config/default.template /etc/nginx/templates/default.conf.template
+
+EXPOSE 8806

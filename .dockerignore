@@ -1,0 +1,11 @@
+.git
+.DS_Store
+.VSCodeCounter
+.joycode
+.qodo
+deploy/data
+phase0-backend-full.log
+phase0-frontend-full.log
+**/node_modules
+**/dist
+**/target
