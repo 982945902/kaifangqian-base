@@ -21,6 +21,8 @@
  */
 package com.kaifangqian.modules.opensign.sign;
 
+import com.kaifangqian.modules.account.enums.SignConsumeTypeEnum;
+import com.kaifangqian.modules.opensign.pdfbox.AssinaturaPDF;
 import com.kaifangqian.modules.opensign.enums.PersonalSignAuthTypeEnum;
 import com.kaifangqian.modules.opensign.enums.SignTypeEnum;
 import com.kaifangqian.modules.opensign.service.business.vo.YundunSignPositionArrayData;
@@ -72,6 +74,9 @@ public class PdfSignService {
 
     @Autowired
     private PdfEncryptionService pdfEncryptionService ;
+
+    @Autowired
+    private LocalSignService localSignService;
 
     public Integer getPdfPage(byte[] pdfByte){
         Integer page = 0 ;
@@ -274,5 +279,80 @@ public class PdfSignService {
         pdfSignResult.setNewDocFileByteMap(pdfSignVoInfo.getNewDocFileByteMap());
 //        log.info("签署完成了");
         return pdfSignResult ;
+    }
+
+    public PdfSignResult signWithLocalCert(PdfSignVoInfo pdfSignVoInfo) {
+        com.kaifangqian.modules.opensign.pdfbox.vo.CertificateInfo certInfo = localSignService.loadCertificateInfo();
+        PdfSignResult pdfSignResult = new PdfSignResult();
+        Map<String, byte[]> signedDocMap = new HashMap<>();
+
+        for (Map.Entry<String, byte[]> entry : pdfSignVoInfo.getNewDocFileByteMap().entrySet()) {
+            String docId = entry.getKey();
+            byte[] currentPdf = pdfEncryptionService.pdfToEncrypted(entry.getValue());
+
+            for (YundunSignPositionArrayData positionArrayData : pdfSignVoInfo.getYundunSignPositionArrayDatas()) {
+                if (!docId.equals(positionArrayData.getDocId()) || positionArrayData.getYundunSignPositionDataList() == null) {
+                    continue;
+                }
+                for (YundunSignPositionData positionData : positionArrayData.getYundunSignPositionDataList()) {
+                    currentPdf = signSinglePosition(currentPdf, certInfo, positionData.getSealImgByte(),
+                            positionData.getSealPosition(), pdfSignVoInfo);
+                }
+            }
+            signedDocMap.put(docId, currentPdf);
+        }
+
+        pdfSignResult.setNewDocFileByteMap(signedDocMap);
+        pdfSignResult.setFinalSignType(SignConsumeTypeEnum.WILLINGESS_FREE_SIGN.getCode());
+        pdfSignResult.setAuthType(SignConsumeTypeEnum.WILLINGESS_FREE_SIGN.getCode());
+        if (MyStringUtils.isNotBlank(pdfSignVoInfo.getPersonalSignAuthType())) {
+            pdfSignResult.setPersonalSignAuth(pdfSignVoInfo.getPersonalSignAuthType());
+        } else {
+            pdfSignResult.setPersonalSignAuth(PersonalSignAuthTypeEnum.REQUIRED.getType());
+        }
+        return pdfSignResult;
+    }
+
+    private byte[] signSinglePosition(byte[] pdfBytes,
+                                      com.kaifangqian.modules.opensign.pdfbox.vo.CertificateInfo certInfo,
+                                      byte[] sealBytes,
+                                      RealPositionProperty realPositionProperty,
+                                      PdfSignVoInfo pdfSignVoInfo) {
+        try {
+            com.kaifangqian.modules.opensign.pdfbox.vo.AssinaturaModel assinatura =
+                    new com.kaifangqian.modules.opensign.pdfbox.vo.AssinaturaModel();
+            assinatura.setCertInfo(certInfo);
+            assinatura.setPdf(pdfBytes);
+            assinatura.setSignatureImage(sealBytes);
+            assinatura.setName(pdfSignVoInfo.getAppName());
+            assinatura.setLocation(pdfSignVoInfo.getAppName() + "：" + pdfSignVoInfo.getAppId());
+
+            if (MyStringUtils.isNotBlank(pdfSignVoInfo.getPersonalSignAuthType())
+                    && pdfSignVoInfo.getPersonalSignAuthType().equals(PersonalSignAuthTypeEnum.NOT_REQUIRED.getType())) {
+                assinatura.setReason("ID:" + pdfSignVoInfo.getSignRu().getId() + "，本地证书签署，仅用于私有化环境测试。");
+            } else {
+                assinatura.setReason("ID:" + pdfSignVoInfo.getSignRu().getId() + "，本地证书签署，签署人已在本地模式下完成确认。");
+            }
+
+            com.kaifangqian.modules.opensign.pdfbox.vo.AssinaturaPosition position =
+                    new com.kaifangqian.modules.opensign.pdfbox.vo.AssinaturaPosition();
+            position.setPage(realPositionProperty.getPageNum());
+            position.setOffsetX(String.valueOf(realPositionProperty.getStartx()));
+            position.setSignWidth(String.valueOf(realPositionProperty.getEndx() - realPositionProperty.getStartx()));
+            float signHeight = realPositionProperty.getStarty() - realPositionProperty.getEndy();
+            if (signHeight < 0) {
+                signHeight = realPositionProperty.getEndy() - realPositionProperty.getStarty();
+            }
+            position.setSignHeight(String.valueOf(signHeight));
+            position.setOffsetY(String.valueOf(realPositionProperty.getRealPdfHeight() - realPositionProperty.getStarty() - signHeight));
+            assinatura.setPosition(position);
+            assinatura.setSignatureKey(UUID.randomUUID().toString().replace("-", ""));
+
+            AssinaturaPDF assinaturaPDF = new AssinaturaPDF(assinatura);
+            return assinaturaPDF.assina();
+        } catch (Exception e) {
+            log.error("本地证书签署失败", e);
+            throw new PaasException("本地证书签署失败");
+        }
     }
 }

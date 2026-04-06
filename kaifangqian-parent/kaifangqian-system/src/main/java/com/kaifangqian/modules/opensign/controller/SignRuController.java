@@ -82,6 +82,7 @@ import com.kaifangqian.modules.opensign.service.flow.IFlowService;
 import com.kaifangqian.modules.opensign.service.flow.IInstanceTaskService;
 import com.kaifangqian.modules.opensign.service.seal.SignEntSealService;
 import com.kaifangqian.modules.opensign.service.tool.SignFileService;
+import com.kaifangqian.modules.opensign.sign.LocalSignService;
 import com.kaifangqian.modules.opensign.vo.response.EntSealAuthorizedResponse;
 import com.kaifangqian.modules.opensign.vo.response.EntSealListResponse;
 import com.kaifangqian.modules.opensign.vo.response.RunCertificateVerifyResponse;
@@ -130,6 +131,9 @@ public class SignRuController {
     private FileProperties fileProperties;
     @Autowired
     private PdfboxService pdfboxService;
+
+    @Autowired
+    private LocalSignService localSignService;
 
     @Autowired
     private SignRuService ruService;
@@ -1476,7 +1480,7 @@ public class SignRuController {
         }
         response.setHolderType(holderType);
         //如果不使用证书，则直接返回
-        if (SignRuCaSignTypeEnum.NO_USE_CA.getCode().equals(ru.getCaSignType())) {
+        if (!localSignService.isEnabled() && SignRuCaSignTypeEnum.NO_USE_CA.getCode().equals(ru.getCaSignType())) {
             response.setReturnMsg(VerifyCertificateEnum.NO_USE_CERTIFICATE.getName());
             response.setReturnCode(VerifyCertificateEnum.NO_USE_CERTIFICATE.getCode());
             return Result.OK(response);
@@ -1528,6 +1532,16 @@ public class SignRuController {
             response.setReturnCode(VerifyCertificateEnum.NO_HAVE_CERTIFICATE.getCode());
             return Result.OK(response);
         }
+
+        if (localSignService.isEnabled()) {
+            response.setTenantId(tenantId);
+            response.setCertType(CertTypeEnum.CA_TEST.getCode());
+            response.setIssueOrg(localSignService.getIssueOrg());
+            response.setReturnMsg(VerifyCertificateEnum.ENABLE_CERTIFICATE.getName());
+            response.setReturnCode(VerifyCertificateEnum.ENABLE_CERTIFICATE.getCode());
+            return Result.OK(response);
+        }
+
         //如果是使用CA证书
         if (SignRuCaSignTypeEnum.CA.getCode().equals(ru.getCaSignType())) {
             certTypeEnum = CertTypeEnum.CA_TEST;

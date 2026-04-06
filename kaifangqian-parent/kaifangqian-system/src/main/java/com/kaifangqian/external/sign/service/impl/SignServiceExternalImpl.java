@@ -49,6 +49,7 @@ import com.kaifangqian.modules.opensign.entity.SignRuTask;
 import com.kaifangqian.modules.opensign.entity.SignUserConfirm;
 import com.kaifangqian.modules.opensign.service.confirm.ISignUserConfirmService;
 import com.kaifangqian.modules.opensign.service.ru.SignRuTaskService;
+import com.kaifangqian.modules.opensign.sign.LocalSignService;
 import com.kaifangqian.modules.system.service.ISysAppInfoService;
 import com.kaifangqian.utils.MD5Util;
 import com.kaifangqian.utils.MyStringUtils;
@@ -78,6 +79,9 @@ public class SignServiceExternalImpl implements SignServiceExternal {
 
     @Autowired
     private ISysAppInfoService sysAppInfoService;
+
+    @Autowired
+    private LocalSignService localSignService;
 
     @Value("${service.app-id}")
     private String appId ;
@@ -118,6 +122,14 @@ public class SignServiceExternalImpl implements SignServiceExternal {
             verifyOrderNo = signUserConfirmService.saveExt(signOrderRequest.getBizId());
         }else if(signUserConfirm != null){
             verifyOrderNo = signUserConfirm.getId();
+        }
+
+        if (localSignService.isEnabled()) {
+            signUserConfirmService.setFlag(verifyOrderNo, true);
+            signOrderServiceInfoResponse.setStatus(0);
+            signOrderServiceInfoResponse.setResultMessage("LOCAL_SIGN_SUCCESS");
+            signOrderServiceInfoResponse.setSignConfirmUrl(signOrderRequest.getCallbackPage());
+            return signOrderServiceInfoResponse;
         }
 
         //查询本地订单是否可以继续意愿校验签署

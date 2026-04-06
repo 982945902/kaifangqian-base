@@ -49,6 +49,7 @@ import com.kaifangqian.modules.opensign.service.ru.*;
 import com.kaifangqian.modules.opensign.service.template.SignTemplateControlService;
 import com.kaifangqian.modules.opensign.service.template.SignTemplateImageRecordService;
 import com.kaifangqian.modules.opensign.service.template.SignTemplateRecordService;
+import com.kaifangqian.modules.opensign.sign.LocalSignService;
 import com.kaifangqian.modules.opensign.sign.PdfSignService;
 import com.kaifangqian.modules.opensign.vo.base.sign.*;
 import com.kaifangqian.modules.opensign.vo.response.ru.SignNodeConfigResponse;
@@ -191,6 +192,9 @@ public class RuBusinessService {
 
     @Autowired
     private PdfSignService pdfSignService;
+
+    @Autowired
+    private LocalSignService localSignService;
 
     @Autowired
     private SignRuTaskService ruTaskService ;
@@ -2570,18 +2574,10 @@ public class RuBusinessService {
                 }
             }
 
-            SignAppInfoResponse signAppInfoResponse;
-
-            try{
-                signAppInfoResponse = signServiceManageExternal.querySignAppInfo();
-            } catch (Exception e) {
-                throw new PaasException("业务线实例-未开通开放签签署服务");
-            }
-
             // 构建签署参数
             PdfSignVoInfo pdfSignVoInfo = new PdfSignVoInfo();
             pdfSignVoInfo.setSignRu(signRu);
-            pdfSignVoInfo.setAppName(signAppInfoResponse.getAppName());
+            pdfSignVoInfo.setAppName(localSignService.isEnabled() ? localSignService.getIssueOrg() : null);
             pdfSignVoInfo.setAppId(appId);
             pdfSignVoInfo.setNewDocFileByteMap(newDocFileByteMap);
             pdfSignVoInfo.setEntSealByte(entSealByte);
@@ -2593,7 +2589,19 @@ public class RuBusinessService {
             pdfSignVoInfo.setTaskId(signRuTask.getId());
 
             // 执行签署
-            PdfSignResult pdfSignResult = pdfSignService.signWithYundunHash(pdfSignVoInfo);
+            PdfSignResult pdfSignResult;
+            if (localSignService.isEnabled()) {
+                pdfSignResult = pdfSignService.signWithLocalCert(pdfSignVoInfo);
+            } else {
+                SignAppInfoResponse signAppInfoResponse;
+                try{
+                    signAppInfoResponse = signServiceManageExternal.querySignAppInfo();
+                } catch (Exception e) {
+                    throw new PaasException("业务线实例-未开通开放签签署服务");
+                }
+                pdfSignVoInfo.setAppName(signAppInfoResponse.getAppName());
+                pdfSignResult = pdfSignService.signWithYundunHash(pdfSignVoInfo);
+            }
 
             if (pdfSignResult != null && MyStringUtils.isNotBlank(pdfSignResult.getSignOrderNo()) && pdfSignResult.getFinalSignType() == SignConsumeTypeEnum.AUTO_SIGN.getCode()){
                 if(signRuTask != null){

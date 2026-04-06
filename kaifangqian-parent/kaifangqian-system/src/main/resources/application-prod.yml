@@ -252,6 +252,9 @@ service:
   # 弃用该配置
   base-host: ''
   token: ${TOKEN:iinHstP/OFm7N/W1vDaFVAZ8mmb5BtUI7YJrX4oJcZKYVl6zUijHPaGOE/7cAmQvqSBudRZSYRaVvsotD+Jdfm9DphMY/6A4JKXmSGwyJRP+qgQDA/dC1IRE+zurtfkkr8JX5xJtQxc8TutfD0Qvgt1QpBrH+TTQm8F4gridH3FdhphiO90963Cu9FtrWHgn+7tyi09DRZEJKzKr16/jxlZGlLCKBSa/he2etkQUIJSyCbt2OB8WBP2+3T5lljML0jq9y1ZzODXNU/xZY5BuaVJR9Hxqm9b7kYygEMCYUzXRpno5pMiMUtB732KFjyu8OAcTsF7X+lI9odZOl2RDzx7/Vy6eAyzGyYg5vF79leWhlP2q+EX7XBc4xC5+5c+tXIiRkf+JNqHMroFhVnvd923BYkzkDGHW9CsMzipSZRRpV5oZchhFqPwb2L0e+8zmm9idIv3xf8xHt3hGhSbrkWGebd9SzDLozES4LnQtv1sGp7WLqaOcsj8QAI7/TL6yZReCBbDnuPAchOcIRZTQohiDrn9eZyKRrZdmhhDn8Dgt1oYVhIsrQa5r5Ornxn61dGA679NgK/7vOUP5V3HfwxW3eSkYBWaH/sexEPdaHo+Oh4XGc9GtF8eni5V7+Vn82xkKosM4qDAWXvQL23w0C/SUlptsj6LB1JExb0FEkfqgtGbnc4lEF0eEx3uM+tCJPUSOTCklZV+jXzjmz/hVNhQ0yb0vw9DMzmP+S1oTP9Z/tn7izaai+QUZtmWWk7i4RUhsd1pCvVrCEsy+cWHRFdAj5ACEkKlSB2keIgKf8eBcqJpMAaSjX0l+R2fKrvLV8vsTr8hMDPnO+Fm/DGwvJxr3Kvu/Ch3gbFJ6i3GxSBK15Fi3p4GzjasN5B+Ho+gGvkVB8gGj69ZFLg0OQtfHn2n2WdpuO77JNlAGb2aav83Fajvh968N6pGhNWoNFIzDLjLJX7XmWvkqIL4j8tbC/P4OHsREuYlLRLhUOrkbp1Saj5eeIiJK0mhsDeWi7WbI}
+  local-sign-enabled: ${LOCAL_SIGN_ENABLED:false}
+  local-sign-pfx-path: ${LOCAL_SIGN_PFX_PATH:}
+  local-sign-pfx-password: ${LOCAL_SIGN_PFX_PASSWORD:}
   yundun-base-host: ${YUNDUN_HOST:https://yundun.kaifangqian.com/yundun}
   # 开放签云盾API_TOKEN
   app-id: ${YD_APP_ID}
