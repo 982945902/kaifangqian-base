@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -720,8 +721,9 @@ public class PDDocument implements Closeable
             {
                 COSDictionary cosBaseDict = (COSDictionary) base;
                 String origonFieldName = cosBaseDict.getString(COSName.T);
+                boolean fieldNameMatch = fieldName == null || Objects.equals(origonFieldName, fieldName);
                 // Search for signature annotation
-                if (origonFieldName != null &&!annotFound && COSName.ANNOT.equals(cosBaseDict.getCOSName(COSName.TYPE)) && origonFieldName.equals(fieldName))
+                if (!annotFound && COSName.ANNOT.equals(cosBaseDict.getCOSName(COSName.TYPE)) && fieldNameMatch)
                 {
                     assignSignatureRectangle(firstWidget, cosBaseDict);
                     annotFound = true;
@@ -729,7 +731,7 @@ public class PDDocument implements Closeable
                 // Search for signature field
                 COSDictionary apDict = cosBaseDict.getCOSDictionary(COSName.AP);
                 if (apDict != null && !sigFieldFound
-                        && COSName.SIG.equals(cosBaseDict.getCOSName(COSName.FT)) && origonFieldName.equals(fieldName))
+                        && COSName.SIG.equals(cosBaseDict.getCOSName(COSName.FT)) && fieldNameMatch)
                 {
                     assignAppearanceDictionary(firstWidget, apDict);
                     assignAcroFormDefaultResource(acroForm, cosBaseDict);
