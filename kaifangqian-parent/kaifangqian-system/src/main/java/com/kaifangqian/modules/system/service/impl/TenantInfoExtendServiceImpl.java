@@ -28,6 +28,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kaifangqian.external.auth.response.IdentityAuthResponse;
 import com.kaifangqian.config.AnnexType;
 import com.kaifangqian.modules.api.entity.ApiRelationLink;
 import com.kaifangqian.modules.api.exception.RequestParamsException;
@@ -888,7 +889,7 @@ public class TenantInfoExtendServiceImpl extends ServiceImpl<TenantInfoExtendMap
     @Autowired
     private ITenantAuthLogService tenantAuthLogService;
 
-    private void generatePersonDefaultSeal(String name) {
+    private void generatePersonDefaultSeal(String name, SysDepart depart, TenantInfoExtend tenantInfoExtend) {
         BufferedImage bufferedImage = null;
         byte[] sealByte = null;
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -901,17 +902,97 @@ public class TenantInfoExtendServiceImpl extends ServiceImpl<TenantInfoExtendMap
         }
 
 
-        LoginUser currentUser = MySecurityUtils.getCurrentUser();
         SignPersonSeal personSeal = new SignPersonSeal();
         personSeal.setSealName("默认签名");
-        personSeal.setSysDeptId(currentUser.getDepartId());
+        personSeal.setSysTenantId(tenantInfoExtend.getTenantId());
+        personSeal.setSysOrgCode(depart.getOrgCode());
+        personSeal.setSysDeptId(depart.getId());
         personSeal.setDeleteFlag(false);
+        personSeal.setSealType(PersonalSealTypeEnum.TEMPLATE.getType());
 
-        boolean save = personSealService.save(personSeal);
-        String annexId = signFileService.saveAnnexStorage(sealByte, SignFileEnum.SEAL_FILE_PERSON, personSeal.getId());
+        personSealService.save(personSeal);
+        signFileService.saveAnnexStorage(sealByte, SignFileEnum.SEAL_FILE_PERSON, personSeal.getId());
 //        signFileService.updateAnnexStorage(SignFileEnum.SEAL_FILE_PERSON, personSeal.getId(), annexId);
 
 
+    }
+
+    private Integer resolveEnterpriseAuthType(TenantInfoExtend tenantInfoExtend, Integer requestAuthType) {
+        if (TenantAuthStatus.STATUS2.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return requestAuthType != null ? requestAuthType : TenantAuthType.CHANGE.getType();
+        }
+        if (TenantAuthStatus.STATUS3.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return TenantAuthType.RELOAD.getType();
+        }
+        return TenantAuthType.CREATED.getType();
+    }
+
+    private Integer resolvePersonalAuthType(TenantInfoExtend tenantInfoExtend, Integer requestAuthType) {
+        if (TenantAuthStatus.STATUS2.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return requestAuthType != null ? requestAuthType : TenantAuthType.CHANGE.getType();
+        }
+        if (TenantAuthStatus.STATUS3.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return TenantAuthType.RELOAD.getType();
+        }
+        return TenantAuthType.CREATED.getType();
+    }
+
+    private TenantInfoExtend getPersonalTenantInfo(String userId, String tenantId) {
+        TenantInfoExtend tenantInfoExtend = getTenantInfoByTenantId(tenantId);
+        if (tenantInfoExtend != null && TenantType.PERSONAL.getType().equals(tenantInfoExtend.getTenantType())) {
+            return tenantInfoExtend;
+        }
+        SysTenantUser personalTenantUser = iSysTenantUserService.getPersonalTenantUser(userId);
+        if (personalTenantUser == null) {
+            return null;
+        }
+        return getTenantInfoByTenantId(personalTenantUser.getTenantId());
+    }
+
+    private IdentityAuthResponse buildLocalIdentityAuthResponse(String message) {
+        IdentityAuthResponse response = new IdentityAuthResponse();
+        response.setAuthStatus(1);
+        response.setResultMessage(message);
+        return response;
+    }
+
+    private String resolveEnterpriseLocalAuthName(TenantInfoExtend tenantInfoExtend) {
+        if (StringUtils.isNotBlank(tenantInfoExtend.getName())) {
+            return tenantInfoExtend.getName();
+        }
+        SysTenantInfo sysTenantInfo = iSysTenantInfoService.getById(tenantInfoExtend.getTenantId());
+        if (sysTenantInfo != null && StringUtils.isNotBlank(sysTenantInfo.getTenantName())) {
+            return sysTenantInfo.getTenantName();
+        }
+        return tenantInfoExtend.getTenantId();
+    }
+
+    private String resolvePersonalLocalAuthName(LoginUser loginUser, TenantInfoExtend tenantInfoExtend) {
+        if (StringUtils.isNotBlank(tenantInfoExtend.getName())) {
+            return tenantInfoExtend.getName();
+        }
+        SysUser sysUser = sysUserService.getById(loginUser.getId());
+        if (sysUser != null) {
+            if (StringUtils.isNotBlank(sysUser.getRealname())) {
+                return sysUser.getRealname();
+            }
+            if (StringUtils.isNotBlank(sysUser.getUsername())) {
+                return sysUser.getUsername();
+            }
+            if (StringUtils.isNotBlank(sysUser.getPhone())) {
+                return sysUser.getPhone();
+            }
+        }
+        if (StringUtils.isNotBlank(loginUser.getRealname())) {
+            return loginUser.getRealname();
+        }
+        if (StringUtils.isNotBlank(loginUser.getUsername())) {
+            return loginUser.getUsername();
+        }
+        if (StringUtils.isNotBlank(loginUser.getPhone())) {
+            return loginUser.getPhone();
+        }
+        return tenantInfoExtend.getTenantId();
     }
 
     @Override
@@ -1083,6 +1164,164 @@ public class TenantInfoExtendServiceImpl extends ServiceImpl<TenantInfoExtendMap
         return Result.OK(infoExtend.getTenantId());
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public IdentityAuthResponse localEnterpriseIdentityAuth() throws Exception {
+        LoginUser loginUser = MySecurityUtils.getCurrentUser();
+        TenantInfoExtend tenantInfoExtend = getTenantInfoByTenantId(loginUser.getTenantId());
+        if (tenantInfoExtend == null) {
+            throw new PaasException("企业信息不存在");
+        }
+        if (!TenantType.GROUP.getType().equals(tenantInfoExtend.getTenantType())) {
+            throw new PaasException("当前账户不是企业账户");
+        }
+
+        IdentityAuthResponse response = buildLocalIdentityAuthResponse("企业实名认证已在本地通过");
+        if (TenantAuthStatus.STATUS2.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return response;
+        }
+
+        SysTenantUser tenantUser = iSysTenantUserService.getTenantUser(tenantInfoExtend.getTenantId(), loginUser.getId());
+        if (tenantUser == null && StringUtils.isNotBlank(tenantInfoExtend.getApplyTenantUser())) {
+            tenantUser = iSysTenantUserService.getById(tenantInfoExtend.getApplyTenantUser());
+        }
+        if (tenantUser == null) {
+            throw new PaasException("企业成员信息不存在");
+        }
+
+        Date now = new Date();
+        Integer authType = resolveEnterpriseAuthType(tenantInfoExtend, null);
+        String tenantName = resolveEnterpriseLocalAuthName(tenantInfoExtend);
+        String authLogId = UUIDGenerator.generate();
+        String orderNo = "LOCAL-" + authLogId;
+
+        tenantInfoExtend.setName(tenantName);
+        tenantInfoExtend.setAuthStatus(TenantAuthStatus.STATUS2.getStatus());
+        tenantInfoExtend.setAuthType(authType);
+        tenantInfoExtend.setAuthId(authLogId);
+        tenantInfoExtend.setApplyTenantUser(tenantUser.getId());
+        tenantInfoExtend.setCompanyVerifyMethod("letter");
+        tenantInfoExtend.setVerifyTime(now);
+        tenantInfoExtend.setOrderNo(orderNo);
+        tenantInfoExtend.setUpdateTime(now);
+        updateById(tenantInfoExtend);
+
+        TenantAuthLog tenantAuthLog = new TenantAuthLog();
+        tenantAuthLog.setId(authLogId);
+        tenantAuthLog.setTenantId(tenantInfoExtend.getTenantId());
+        tenantAuthLog.setTenantType(TenantType.GROUP.getType());
+        tenantAuthLog.setExtendId(tenantInfoExtend.getId());
+        tenantAuthLog.setName(tenantName);
+        tenantAuthLog.setOrganizationNo(tenantInfoExtend.getOrganizationNo());
+        tenantAuthLog.setCorporation(tenantInfoExtend.getCorporation());
+        tenantAuthLog.setCorporationNo(tenantInfoExtend.getCorporationNo());
+        tenantAuthLog.setPhone(tenantInfoExtend.getPhone());
+        tenantAuthLog.setRealItem(TenantAuthRealItemType.Item1.getType());
+        tenantAuthLog.setAuthStatus(TenantAuthStatus.STATUS2.getStatus());
+        tenantAuthLog.setAuthType(authType);
+        tenantAuthLog.setApplyTime(now);
+        tenantAuthLog.setCheckTime(now);
+        tenantAuthLog.setVerifyTime(now);
+        tenantAuthLog.setApplyTenantUser(tenantUser.getId());
+        tenantAuthLog.setCompanyVerifyMethod("letter");
+        tenantAuthLog.setCheckMsg("私有化部署本地实名认证通过");
+        tenantAuthLog.setOrderNo(orderNo);
+        tenantAuthLog.setOrderStatus(1);
+        tenantAuthLogService.save(tenantAuthLog);
+
+        SysTenantInfo sysTenantInfo = iSysTenantInfoService.getById(tenantInfoExtend.getTenantId());
+        if (sysTenantInfo != null && StringUtils.isNotBlank(tenantName)) {
+            sysTenantInfo.setTenantName(tenantName);
+            iSysTenantInfoService.updateById(sysTenantInfo);
+        }
+
+        SysDepart sysDepart = iSysDepartService.getByTenantId(tenantInfoExtend.getTenantId());
+        if (sysDepart != null && StringUtils.isNotBlank(tenantName)) {
+            entSealBusinessService.generateEntDefaultSeal(tenantName, tenantUser, sysDepart.getId());
+        }
+        bindTaskData(tenantName, tenantInfoExtend.getTenantId());
+        return response;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public IdentityAuthResponse localPersonalIdentityAuth() throws Exception {
+        LoginUser loginUser = MySecurityUtils.getCurrentUser();
+        TenantInfoExtend tenantInfoExtend = getPersonalTenantInfo(loginUser.getId(), loginUser.getTenantId());
+        if (tenantInfoExtend == null) {
+            throw new PaasException("个人空间不存在");
+        }
+
+        IdentityAuthResponse response = buildLocalIdentityAuthResponse("个人实名认证已在本地通过");
+        if (TenantAuthStatus.STATUS2.getStatus().equals(tenantInfoExtend.getAuthStatus())) {
+            return response;
+        }
+
+        SysTenantUser personalTenantUser = iSysTenantUserService.getTenantUser(tenantInfoExtend.getTenantId(), loginUser.getId());
+        if (personalTenantUser == null) {
+            personalTenantUser = iSysTenantUserService.getPersonalTenantUser(loginUser.getId());
+        }
+        if (personalTenantUser == null) {
+            throw new PaasException("个人空间不存在");
+        }
+
+        Date now = new Date();
+        Integer authType = resolvePersonalAuthType(tenantInfoExtend, null);
+        String authName = resolvePersonalLocalAuthName(loginUser, tenantInfoExtend);
+        String authLogId = UUIDGenerator.generate();
+        String orderNo = "LOCAL-" + authLogId;
+
+        tenantInfoExtend.setName(authName);
+        tenantInfoExtend.setAuthStatus(TenantAuthStatus.STATUS2.getStatus());
+        tenantInfoExtend.setAuthType(authType);
+        tenantInfoExtend.setAuthId(authLogId);
+        tenantInfoExtend.setApplyTenantUser(personalTenantUser.getId());
+        tenantInfoExtend.setPersonVerifyMethod("offline");
+        tenantInfoExtend.setVerifyTime(now);
+        tenantInfoExtend.setOrderNo(orderNo);
+        tenantInfoExtend.setUpdateTime(now);
+        updateById(tenantInfoExtend);
+
+        TenantAuthLog tenantAuthLog = new TenantAuthLog();
+        tenantAuthLog.setId(authLogId);
+        tenantAuthLog.setTenantId(tenantInfoExtend.getTenantId());
+        tenantAuthLog.setTenantType(TenantType.PERSONAL.getType());
+        tenantAuthLog.setExtendId(tenantInfoExtend.getId());
+        tenantAuthLog.setName(authName);
+        tenantAuthLog.setOrganizationNo(tenantInfoExtend.getOrganizationNo());
+        tenantAuthLog.setPhone(tenantInfoExtend.getPhone());
+        tenantAuthLog.setRealItem(TenantAuthRealItemType.Item1.getType());
+        tenantAuthLog.setAuthStatus(TenantAuthStatus.STATUS2.getStatus());
+        tenantAuthLog.setAuthType(authType);
+        tenantAuthLog.setApplyTime(now);
+        tenantAuthLog.setCheckTime(now);
+        tenantAuthLog.setVerifyTime(now);
+        tenantAuthLog.setApplyTenantUser(personalTenantUser.getId());
+        tenantAuthLog.setPersonVerifyMethod("offline");
+        tenantAuthLog.setCheckMsg("私有化部署本地实名认证通过");
+        tenantAuthLog.setOrderNo(orderNo);
+        tenantAuthLog.setOrderStatus(1);
+        tenantAuthLogService.save(tenantAuthLog);
+
+        SysTenantInfo sysTenantInfo = iSysTenantInfoService.getById(tenantInfoExtend.getTenantId());
+        if (sysTenantInfo != null && StringUtils.isNotBlank(authName)) {
+            sysTenantInfo.setTenantName(authName);
+            iSysTenantInfoService.updateById(sysTenantInfo);
+        }
+        SysUser sysUser = sysUserService.getById(loginUser.getId());
+        if (sysUser != null && StringUtils.isNotBlank(authName)) {
+            sysUser.setRealname(authName);
+            sysUserService.updateById(sysUser);
+        }
+        personalTenantUser.setNickName(authName);
+        iSysTenantUserService.updateById(personalTenantUser);
+        SysDepart sysDepart = iSysDepartService.getByTenantId(tenantInfoExtend.getTenantId());
+        if (sysDepart != null && StringUtils.isNotBlank(authName)) {
+            generatePersonDefaultSeal(authName, sysDepart, tenantInfoExtend);
+        }
+        return response;
+    }
+
     private String addTenantInfo(EnterpriseRegister register) {
         //创建租户
         SysTenantInfoVO sysTenantInfoVO = new SysTenantInfoVO();
@@ -1118,23 +1357,6 @@ public class TenantInfoExtendServiceImpl extends ServiceImpl<TenantInfoExtendMap
         flowService.bindOutUserTask(tenantName, null, null, null, null, null, tenantId, null, "tenantCheck");
         //绑定租户ID：(查询用户ID)租户账号ID
         flowService.bindTenantUserTaskAll(tenantId, "tenantCheck");
-    }
-
-    private void saveTenantAnnex(TenantAuthVO vo, String fatherId) {
-        List<StorageDto> files = new ArrayList<>();
-        if (StringUtils.isNotEmpty(vo.getIdCardEmblem())) {
-            files.add(new StorageDto(vo.getIdCardEmblem()));
-        }
-        if (StringUtils.isNotEmpty(vo.getIdCardFace())) {
-            files.add(new StorageDto(vo.getIdCardFace()));
-        }
-        if (StringUtils.isNotEmpty(vo.getBusinessLicense())) {
-            files.add(new StorageDto(vo.getBusinessLicense()));
-        }
-        if (StringUtils.isNotEmpty(vo.getAuthorizeBook())) {
-            files.add(new StorageDto(vo.getAuthorizeBook()));
-        }
-        if (files.size() > 0) iAnnexStorageService.updateMainDataFiles(fatherId, files);
     }
 
     TenantInfoExtend getByOrgCode(String orgCode) {

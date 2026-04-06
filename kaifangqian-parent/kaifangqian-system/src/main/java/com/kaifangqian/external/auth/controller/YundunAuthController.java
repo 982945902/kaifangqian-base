@@ -24,6 +24,9 @@ package com.kaifangqian.external.auth.controller;
 import com.kaifangqian.external.auth.request.AuthUrlRequest;
 import com.kaifangqian.external.auth.service.IdentityAuthExternal;
 import com.kaifangqian.common.vo.Result;
+import com.kaifangqian.entity.SysConfig;
+import com.kaifangqian.modules.system.service.ITenantInfoExtendService;
+import com.kaifangqian.service.ISysConfigService;
 // import io.swagger.annotations.Api;
 // import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,10 @@ public class YundunAuthController {
 
     @Autowired
     private IdentityAuthExternal identityAuthExternal;
+    @Autowired
+    private ITenantInfoExtendService tenantInfoExtendService;
+    @Autowired
+    private ISysConfigService sysConfigService;
 
     /**
      * 个人实名认证
@@ -50,6 +57,9 @@ public class YundunAuthController {
     // @ApiOperation(value = "个人实名认证", notes = "个人实名认证")
     @PostMapping(value = "/personal/add")
     public Result<?> personalAuth(@RequestBody AuthUrlRequest authUrlRequest) throws Exception {
+        if (useLocalIdentityAuth()) {
+            return Result.OK(tenantInfoExtendService.localPersonalIdentityAuth());
+        }
         return Result.OK(identityAuthExternal.personalIdentityAuth(authUrlRequest.getCallbackPage()));
     }
 
@@ -60,6 +70,9 @@ public class YundunAuthController {
     // @ApiOperation(value = "个人实名认证更新", notes = "个人实名认证更新")
     @PostMapping(value = "/personal/update")
     public Result<?> personalAuthUpdate(@RequestBody AuthUrlRequest authUrlRequest) throws Exception {
+        if (useLocalIdentityAuth()) {
+            return Result.OK(tenantInfoExtendService.localPersonalIdentityAuth());
+        }
         return Result.OK(identityAuthExternal.personalIdentityAuthUpdate(authUrlRequest.getCallbackPage()));
     }
 
@@ -70,6 +83,9 @@ public class YundunAuthController {
     // @ApiOperation(value = "企业实名认证", notes = "企业实名认证")
     @PostMapping(value = "/enterprise/add")
     public Result<?> enterpriseAuth(@RequestBody AuthUrlRequest authUrlRequest) throws Exception {
+        if (useLocalIdentityAuth()) {
+            return Result.OK(tenantInfoExtendService.localEnterpriseIdentityAuth());
+        }
         return Result.OK(identityAuthExternal.companyIdentityAuth(authUrlRequest.getCallbackPage()));
     }
 
@@ -80,7 +96,16 @@ public class YundunAuthController {
     // @ApiOperation(value = "企业实名认证更新", notes = "企业实名认证更新")
     @PostMapping(value = "/enterprise/update")
     public Result<?> enterpriseAuthUpdate(@RequestBody AuthUrlRequest authUrlRequest) throws Exception {
+        if (useLocalIdentityAuth()) {
+            return Result.OK(tenantInfoExtendService.localEnterpriseIdentityAuth());
+        }
         return Result.OK(identityAuthExternal.companyIdentityAuthUpdate(authUrlRequest.getCallbackPage()));
+    }
+
+    private boolean useLocalIdentityAuth() {
+        return true;
+//        SysConfig config = sysConfigService.getByType("tenant_auth_switch");
+//        return config == null || !Boolean.parseBoolean(config.getValue());
     }
 
 }

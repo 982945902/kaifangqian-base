@@ -22,6 +22,7 @@ package com.kaifangqian.modules.system.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kaifangqian.external.auth.response.IdentityAuthResponse;
 import com.kaifangqian.modules.api.vo.request.*;
 import com.kaifangqian.modules.api.vo.response.EmployeeRes;
 import com.kaifangqian.modules.opensign.vo.base.ConfirmPara;
@@ -94,5 +95,9 @@ public interface ITenantInfoExtendService extends IService<TenantInfoExtend> {
      * @return
      */
     Result<?> createCompanyTenant(TenantCompanyInfoAddVO tenantName);
+
+    IdentityAuthResponse localEnterpriseIdentityAuth() throws Exception;
+
+    IdentityAuthResponse localPersonalIdentityAuth() throws Exception;
 
 }
