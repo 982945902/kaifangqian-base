@@ -138,7 +138,7 @@
                   class="video pointer"
                   @click="
                     helpJump(
-                      'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E6%93%8D%E4%BD%9C%E8%A7%86%E9%A2%91',
+                      '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E6%93%8D%E4%BD%9C%E8%A7%86%E9%A2%91',
                     )
                   "
                 >
@@ -147,7 +147,7 @@
                     <SvgIcon name="video-des"></SvgIcon>
                   </a-tooltip>
                 </div>
-                <div class="pointer" @click="helpJump('https://docs.kaifangqian.com/')"> 更多 </div>
+                <div class="pointer" @click="helpJump('#')"> 更多 </div>
               </a-space>
             </div>
           </div>
@@ -158,7 +158,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81/%E4%B8%AA%E4%BA%BA%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81/%E4%B8%AA%E4%BA%BA%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81',
                   )
                 "
                 >个人实名认证</span
@@ -168,7 +168,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E6%88%91%E6%98%AF%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86%E5%91%98',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E6%88%91%E6%98%AF%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86%E5%91%98',
                   )
                 "
                 >5步完成电子文件签署</span
@@ -180,7 +180,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81/%E4%BC%81%E4%B8%9A%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81/%E4%BC%81%E4%B8%9A%E5%AE%9E%E5%90%8D%E8%AE%A4%E8%AF%81',
                   )
                 "
                 >企业实名认证</span
@@ -190,7 +190,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E7%94%B5%E5%AD%90%E5%90%88%E5%90%8C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B/B2C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E7%94%B5%E5%AD%90%E5%90%88%E5%90%8C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B/B2C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B',
                   )
                 "
                 >电子签约场景示例</span
@@ -202,7 +202,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E4%BC%81%E4%B8%9A%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE%E6%88%90%E5%91%98%E6%9D%83%E9%99%90',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E4%BC%81%E4%B8%9A%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE%E6%88%90%E5%91%98%E6%9D%83%E9%99%90',
                   )
                 "
                 >企业权限管理</span
@@ -212,7 +212,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E6%A8%A1%E6%9D%BF%E7%AE%A1%E7%90%86/%E6%A8%A1%E6%9D%BF%E4%BB%8B%E7%BB%8D',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E6%A8%A1%E6%9D%BF%E7%AE%A1%E7%90%86/%E6%A8%A1%E6%9D%BF%E4%BB%8B%E7%BB%8D',
                   )
                 "
                 >企业文档模板管理</span
@@ -224,7 +224,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%8D%B0%E7%AB%A0%E7%AE%A1%E7%90%86/%E4%BC%81%E4%B8%9A%E5%8D%B0%E7%AB%A0/%E5%8D%B0%E7%AB%A0%E5%88%B6%E4%BD%9C',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%8D%B0%E7%AB%A0%E7%AE%A1%E7%90%86/%E4%BC%81%E4%B8%9A%E5%8D%B0%E7%AB%A0/%E5%8D%B0%E7%AB%A0%E5%88%B6%E4%BD%9C',
                   )
                 "
                 >企业印章管理</span
@@ -234,7 +234,7 @@
                 style="color: #999; font-size: 12px"
                 @click="
                   helpJump(
-                    'https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E4%B8%9A%E5%8A%A1%E7%BA%BF%E7%AE%A1%E7%90%86/%E4%B8%9A%E5%8A%A1%E7%BA%BF%E4%BB%8B%E7%BB%8D',
+                    '#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E4%B8%9A%E5%8A%A1%E7%BA%BF%E7%AE%A1%E7%90%86/%E4%B8%9A%E5%8A%A1%E7%BA%BF%E4%BB%8B%E7%BB%8D',
                   )
                 "
                 >签发业务线配置</span

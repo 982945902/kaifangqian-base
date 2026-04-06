@@ -21,7 +21,7 @@ services:
           - mysql
     environment:
       # 设置时不要留中括号,例如：- MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_ROOT_PASSWORD=[please set mysql password]
+      - MYSQL_ROOT_PASSWORD=Root@123456
   redis:
     image: registry.cn-beijing.aliyuncs.com/kaifangqian/redis:6.2.14
     hostname: redis

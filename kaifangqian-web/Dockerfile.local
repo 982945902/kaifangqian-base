@@ -4,6 +4,8 @@ WORKDIR /src/kaifangqian-web
 
 COPY . /src/kaifangqian-web
 
+RUN npm config set registry https://registry.npmmirror.com/
+
 RUN npm --prefix opensign-web install --legacy-peer-deps
 RUN npm --prefix opensign-web run build
 

@@ -29,7 +29,7 @@ services:
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=[根据实际情况修改]
   api:
-    image: registry.cn-beijing.aliyuncs.com/kaifangqian/api:v3.2.1
+    image: opensign-api-local:latest
     hostname: opensign-api
     deploy:
       mode: replicated

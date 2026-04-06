@@ -298,10 +298,10 @@ export default defineComponent({
       })
     }
     function handleDoc(){
-      window.open('https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E6%88%91%E6%98%AF%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86%E5%91%98')
+      window.open('#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E6%88%91%E6%98%AF%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86%E5%91%98')
     }
     function handleDemo(){
-      window.open('https://docs.kaifangqian.com/docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E7%94%B5%E5%AD%90%E5%90%88%E5%90%8C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B/B2C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B')
+      window.open('#docs/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E7%94%B5%E5%AD%90%E5%90%88%E5%90%8C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B/B2C%E7%AD%BE%E7%BA%A6%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B')
     }
 
     async function toAuth() {

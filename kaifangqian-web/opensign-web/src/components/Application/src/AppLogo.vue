@@ -47,7 +47,7 @@
       :src="logoBase64"
       style="height: auto; margin: 0 30px"
       @click="showAppVersion"
-      v-if="logoBase64"
+      v-if="false"
     />
   </div>
 </template>

@@ -293,7 +293,7 @@
       });
 
       function handleDoc() {
-        window.open('https://docs.kaifangqian.com/');
+        window.open('#');
       }
       async function jumpApp(row) {
         const userInfo: any = userStore.userInfo;

@@ -4,7 +4,22 @@ WORKDIR /src/kaifangqian-parent
 
 COPY . /src/kaifangqian-parent
 
-RUN mvn -pl kaifangqian-system -am -DskipTests package
+RUN mkdir -p /root/.m2 && cat > /root/.m2/settings.xml <<'EOF'
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <id>aliyunmaven</id>
+      <name>Aliyun Maven Mirror</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+EOF
+
+RUN mvn -s /root/.m2/settings.xml -pl kaifangqian-system -am -DskipTests package
 
 
 FROM eclipse-temurin:8u462-b08-jre-jammy

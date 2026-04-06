@@ -26,8 +26,7 @@
 -->
 <template>
   <div class="anticon" :class="getAppLogoClass" @click="goHome">
-    <img  :src="logoBase64" />
-    <!-- <img v-if="theme==='light'" src="../../../assets/images/logo.png" style="height:auto"/> -->
+    <!-- Logo removed to eliminate brand identity -->
     <div class="ml-2 truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
       {{ title }}
     </div>

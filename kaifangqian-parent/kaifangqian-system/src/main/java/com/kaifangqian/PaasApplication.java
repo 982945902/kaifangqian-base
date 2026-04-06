@@ -34,7 +34,8 @@ import java.net.UnknownHostException;
          * MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,防止未配置Mongo启动报错，如果配置了请删这两个类
          */
         MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
-        SecurityAutoConfiguration.class
+        SecurityAutoConfiguration.class,
+        tech.powerjob.worker.autoconfigure.PowerJobAutoConfiguration.class
 })
 @EnableTransactionManagement
 @MapperScan({"com.kaifangqian.modules.**.mapper", "com.kaifangqian.mapper"})

@@ -13,7 +13,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_general_ci
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
       - ../kaifangqian-parent/sql/opensign.sql:/docker-entrypoint-initdb.d/01-opensign.sql:ro
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass opensign123
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - ./data/redis:/data
     healthcheck:
@@ -81,10 +81,7 @@ services:
       - opensign
 
   web:
-    build:
-      context: ../kaifangqian-web
-      dockerfile: Dockerfile.local
-    image: opensign-web-local:latest
+    image: registry.cn-beijing.aliyuncs.com/kaifangqian/nginx:v3.2.1
     container_name: opensign-web
     restart: unless-stopped
     depends_on:
@@ -95,6 +92,7 @@ services:
       API_SERVER_NAME: opensign-api
       DOMAIN_NAME: localhost
     ports:
+      - "80:8806"
       - "8080:8806"
     networks:
       - opensign

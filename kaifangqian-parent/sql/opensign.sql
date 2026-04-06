@@ -14,7 +14,6 @@
  Date: 14/12/2023 20:16:20
 */
 
-CREATE DATABASE `opensign` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci';
 use opensign;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;

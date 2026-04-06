@@ -199,7 +199,7 @@
         return unref(getSplit) ? MenuModeEnum.HORIZONTAL : null;
       });
       function handleDoc(){
-        window.open('https://docs.kaifangqian.com/')
+        window.open('#')
       }
 
       return {
